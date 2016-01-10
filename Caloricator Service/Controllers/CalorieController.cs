@@ -17,9 +17,7 @@ namespace Caloricator_Service.Controllers
         // GET: api/Calorie
         public IEnumerable<Object> Get()
         {
-            //return new string[] { "value1", "value2" };
-            return (new UserData(1)).GetBenefitsData();
-            
+            return new string[] { "value1", "value2" };            
         }
 
         // GET: api/Calorie/5

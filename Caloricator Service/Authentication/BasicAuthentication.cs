@@ -13,10 +13,12 @@ namespace Caloricator_Service.Authentication
     class BasicAuthentication:IHttpModule
     {
         private const string Realm = "My Realm";
+        static bool newUser = false;
 
         public void Init(HttpApplication context)
         {
             // Register event handlers
+            newUser = false;
             context.AuthenticateRequest += OnApplicationAuthenticateRequest;
             context.EndRequest += OnApplicationEndRequest;
         }
@@ -36,7 +38,7 @@ namespace Caloricator_Service.Authentication
             return username == "user" && password == "password";
         }
 
-        private static void AuthenticateUser(string credentials)
+        private static void AuthenticateUser(string token)
         {
             try
             {
@@ -68,18 +70,15 @@ namespace Caloricator_Service.Authentication
         private static void OnApplicationAuthenticateRequest(object sender, EventArgs e)
         {
             var request = HttpContext.Current.Request;
-            var authHeader = request.Headers["Authorization"];
-            if (authHeader != null)
+            var token = request.Headers["AppAuthorization"];
+            if (token != null)
             {
-                var authHeaderVal = AuthenticationHeaderValue.Parse(authHeader);
-
-                // RFC 2617 sec 1.2, "scheme" name is case-insensitive
-                if (authHeaderVal.Scheme.Equals("basic",
-                        StringComparison.OrdinalIgnoreCase) &&
-                    authHeaderVal.Parameter != null)
-                {
-                    AuthenticateUser(authHeaderVal.Parameter);
-                }
+                AuthenticateUser(token);
+            }
+            else
+            {
+                //Implies new user
+                newUser = true;
             }
         }
 
@@ -90,8 +89,13 @@ namespace Caloricator_Service.Authentication
             var response = HttpContext.Current.Response;
             if (response.StatusCode == 401)
             {
-                response.Headers.Add("WWW-Authenticate",
-                    string.Format("Basic realm=\"{0}\"", Realm));
+                //response.Headers.Add("WWW-Authenticate",
+                //    string.Format("Basic realm=\"{0}\"", Realm));
+                response.Headers.Add("newUser", "true");
+            }
+            if (newUser)
+            {
+                response.Headers.Add("newUser", "true");
             }
         }
 
