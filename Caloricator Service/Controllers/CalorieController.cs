@@ -11,6 +11,7 @@ using System.Web.Http.Cors;
 namespace Caloricator_Service.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*",exposedHeaders:"*")]
+    [Authorize]
     public class CalorieController : ApiController
     {
         // GET: api/Calorie

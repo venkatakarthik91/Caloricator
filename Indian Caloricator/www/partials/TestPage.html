@@ -1,0 +1,24 @@
+﻿<div class="container" ng-controller="CaloricatorController">
+    <div class="row">
+        <div class="col-xs-5"><strong>Search Benefit: </strong> </div>
+        <div class="col-xs-7"><input type="text" ng-model="query" placeholder="Enter part of benefit" /></div>
+    </div>
+    <div class="row">
+        <div class="col-xs-5"><strong>Sort By: </strong></div>
+        <div class="col-xs-7">
+            <select ng-model="orderBy">
+                <option value="title">Title</option>
+                <option value="importance">Importance of Benefit</option>
+            </select>
+        </div>
+
+    </div>
+    <div class="row">
+        <ul class="list-group">
+            <li ng-repeat="benefit in benefitsOfCounting | filter: query | orderBy: orderBy" class="list-group-item">
+                <span class="list-group-item-heading"><strong>{{benefit.title}}</strong></span>
+                <p class="list-group-item-info">{{benefit.description}}</p>
+            </li>
+        </ul>
+    </div>
+</div>
