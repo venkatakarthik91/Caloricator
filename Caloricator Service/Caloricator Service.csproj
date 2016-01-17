@@ -128,7 +128,6 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Authentication\BasicAuthentication.cs" />
-    <Compile Include="Authentication\Class1.cs" />
     <Compile Include="Authentication\CustomIdentity.cs" />
     <Compile Include="BusinessLogic\CoreBusinessLogic.cs" />
     <Compile Include="Controllers\CalorieController.cs" />
