@@ -128,10 +128,13 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Authentication\BasicAuthentication.cs" />
-    <Compile Include="Authentication\Token.cs" />
+    <Compile Include="Authentication\CustomIdentity.cs" />
     <Compile Include="BusinessLogic\CoreBusinessLogic.cs" />
     <Compile Include="Controllers\CalorieController.cs" />
+    <Compile Include="Controllers\NewUserController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DataAccessLayer\DAL.cs" />
+    <Compile Include="DataAccessLayer\User.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

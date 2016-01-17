@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using Caloricator_Service.Models;
 using Caloricator_Service.DataAccessLayer;
 using System.Web.Http.Cors;
 

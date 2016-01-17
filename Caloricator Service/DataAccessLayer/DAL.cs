@@ -10,53 +10,87 @@ namespace Caloricator_Service.DataAccessLayer
 {
     public class DAL
     {
-        private int uid;
-        private MySqlConnection connection = null;
-
-        public int Uid
-        {
-            get
-            {
-                return uid;
-            }
-
-            set
-            {
-                uid = value;
-            }
-        }
-
-        public DAL(int uid)
-        {
-            Uid = uid;
-            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DB_Conn"].ConnectionString;
-            connection = new MySqlConnection(connectionString);
-        }
-        public DAL()
+        private static MySqlConnection connection = null;
+        static DAL()
         {
             string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DB_Conn"].ConnectionString;
             connection = new MySqlConnection(connectionString);
         }
-        public IEnumerable<object> GetBenefitsData()
+        private static byte ConvertToBit(bool value)
         {
-            var arrayOfBenefits = new[]{
-                new {title="Increased Confidence",description="When we are healthy and looking good , people will be attracted to us and our chances of success increases",importance=3},
-                new {title="Better Health",description="We reduce on the junk food as we will be conscious of what we are eating",importance=1},
-                new {title="Become Thinner",description="We can reduce the intake and increase the expenditure to get thinner",importance=2}
-            };
-            return arrayOfBenefits;
+            if (value)
+            {
+                return 1;
+            }
+            return 0;
         }
-        internal void StoreTokenInDB(string token,string userName)
+        internal static User GetUserObject(string token)
         {
-            MySqlCommand cmd = new MySqlCommand("Insert into contacts values(@name , @email , @message)");
-            cmd.Connection = connection;
-            cmd.CommandType = System.Data.CommandType.Text;
-            cmd.Parameters.AddWithValue("@name", name);
-            cmd.Parameters.AddWithValue("@email", email);
-            cmd.Parameters.AddWithValue("@message", message);
-            connection.Open();
-            cmd.ExecuteNonQuery();
-            connection.Close();
+            User user = new User();
+            MySqlCommand cmd = null;
+            MySqlDataReader reader = null;
+            user.Uid = -1;
+            try
+            {
+                string sql = "SELECT ID, LastName, FirstName, Email, Sex, Age FROM Users WHERE Token = \""+token+"\"";
+                cmd = new MySqlCommand(sql, connection);
+                //cmd.Parameters.AddWithValue("@token", token);
+                connection.Open();
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    user.Uid = reader.GetInt32("ID");
+                    user.LastName = reader.GetString("LastName");
+                    user.FirstName = reader.GetString("FirstName");
+                    user.Email = reader.GetString("Email");
+                    user.Sex = true;
+                    if (reader.GetInt32("Sex") == 0)
+                    {
+                        user.Sex = false;
+                    }
+                    user.Age = reader.GetInt32("Age");
+                    user.Token = token;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                if (reader != null) reader.Close();
+                if (connection != null) connection.Close();
+            }
+            return user;
+        }
+        internal static bool InsertNewUserInDB(User user)
+        {
+            try
+            {
+                string query = @"INSERT INTO Users (LastName,FirstName,Email,Password,Sex,Age,Token)
+                    VALUES(@lastName,@firstName,@email,@password,@sex,@age,@token);";
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@lastName", user.LastName);
+                    cmd.Parameters.AddWithValue("@firstName", user.FirstName);
+                    cmd.Parameters.AddWithValue("@email", user.Email);
+                    cmd.Parameters.AddWithValue("@password", user.Password);
+                    cmd.Parameters.AddWithValue("@sex",ConvertToBit(user.Sex));
+                    cmd.Parameters.AddWithValue("@age", user.Age);
+                    cmd.Parameters.AddWithValue("@token", user.Token);
+
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                connection.Close();
+                return false;
+            }
+            return true;
         }
     }
 }

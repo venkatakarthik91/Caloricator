@@ -8,64 +8,19 @@
     </style>
 </head>
 <body>-->
-<div class="container" ng-controller="newUserController">
-    <form class="form" ng-submit="Submit()">
-        <div class="form-group">
-            <label for="firstName" class="control-label">First Name</label>
-            <input type="text" class="form-control" id="firstName" placeholder="First Name" ng-model="formInfo.firstName">
-            <span class="alert-warning" ng-show="firstNameRequired">Please Enter first name</span>
+    <div class="container" ng-controller="newOrExistingUserController">
+        <div class="row">
+            <button class="btn-primary" ng-click="navigateToNewUser()">New User</button>
         </div>
-        <div class="form-group">
-            <label for="lastName" class="control-label">Last Name</label>
-            <input type="text" class="form-control" id="lastName" placeholder="Last Name" ng-model="formInfo.lastName">
-            <span class="alert-warning" ng-show="lastNameRequired">Please Enter last name</span>
+        <div class="row">
+            <button class="btn-danger" ng-click="">Existing User</button>
         </div>
-        <div class="form-group">
-            <label for="emailID">Email address</label>
-            <input type="email" class="form-control" id="emailID" placeholder="Email" ng-model="formInfo.email">
-            <span class="alert-warning" ng-show="emailRequired">Please Enter Email</span><br />
-            <span class="alert-warning" ng-show="invalidEmail">Please enter a valid Email Address</span>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Password" ng-model="formInfo.password">
-            <span class="alert-warning" ng-show="passwordRequired">Please Enter a password</span><br />
-            <span class="alert-warning" ng-show="strongPasswordRequired">{{passwordError}}</span>
-        </div>
-        <div class="form-group">
-            <label for="confirmPassword" class="control-label">Confirm Password</label>
-            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" ng-model="formInfo.confirmPassword">
-            <span class="alert-warning" ng-show="confirmPasswordRequired">Please Enter the same password again</span><br />
-            <span class="alert-warning" ng-show="matchPasswordRequired">Password and Confirm must match</span>
-        </div>
-        <div class="form-group">
-            <label for="age" class="control-label">Age</label>
-            <input type="number" class="form-control" id="age" placeholder="Age" ng-model="formInfo.age">
-            <span class="alert-warning" ng-show="ageRequired">Please enter age</span>
-        </div>
-        <div class="form-group" ng-init="formInfo.radio='Male'">
-            <div class="radio">
-                <label>
-                    <input type="radio" name="optionsRadios" id="Male" value="Male" checked="checked" ng-model="formInfo.radio">
-                    Male
-                </label>
-            </div>
-            <div class="radio">
-                <label>
-                    <input type="radio" name="optionsRadios" id="Female" value="Female" ng-model="formInfo.radio">
-                    Female
-                </label>
-            </div>
-        </div>
-        <div class="form-group">
-            <input type="submit" name="submit" value="submit" class="btn-primary" />
-        </div>
-    </form>
-</div>
-<!--<script src="scripts/angular.js"></script>
+    </div>
+    <!--<script src="scripts/angular.js"></script>
     <script src="scripts/angular-route.js"></script>
     <script src="scripts/jquery-2.1.4.min.js"></script>
     <script src="scripts/bootstrap.min.js"></script>
     <script src="scripts/controllers.js"></script>
 </body>
 </html>-->
+
