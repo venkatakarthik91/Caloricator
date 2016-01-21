@@ -32,7 +32,7 @@ namespace Caloricator_Service.DataAccessLayer
             user.Uid = -1;
             try
             {
-                string sql = "SELECT ID, LastName, FirstName, Email, Sex, Age FROM Users WHERE Token = \""+token+"\"";
+                string sql = "SELECT ID, LastName, FirstName, Email, Sex, DOB FROM Users WHERE Token = \""+token+"\"";
                 cmd = new MySqlCommand(sql, connection);
                 //cmd.Parameters.AddWithValue("@token", token);
                 connection.Open();
@@ -49,7 +49,7 @@ namespace Caloricator_Service.DataAccessLayer
                     {
                         user.Sex = false;
                     }
-                    user.Age = reader.GetInt32("Age");
+                    user.Dob = reader.GetDateTime("DOB");
                     user.Token = token;
                 }
             }
@@ -68,8 +68,8 @@ namespace Caloricator_Service.DataAccessLayer
         {
             try
             {
-                string query = @"INSERT INTO Users (LastName,FirstName,Email,Password,Sex,Age,Token)
-                    VALUES(@lastName,@firstName,@email,@password,@sex,@age,@token);";
+                string query = @"INSERT INTO Users (LastName,FirstName,Email,Password,Sex,DOB,Token)
+                    VALUES(@lastName,@firstName,@email,@password,@sex,@dob,@token);";
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@lastName", user.LastName);
@@ -77,7 +77,7 @@ namespace Caloricator_Service.DataAccessLayer
                     cmd.Parameters.AddWithValue("@email", user.Email);
                     cmd.Parameters.AddWithValue("@password", user.Password);
                     cmd.Parameters.AddWithValue("@sex",ConvertToBit(user.Sex));
-                    cmd.Parameters.AddWithValue("@age", user.Age);
+                    cmd.Parameters.AddWithValue("@dob", user.Dob);
                     cmd.Parameters.AddWithValue("@token", user.Token);
 
                     connection.Open();
@@ -91,6 +91,33 @@ namespace Caloricator_Service.DataAccessLayer
                 return false;
             }
             return true;
+        }
+        internal static bool CheckIfEmailExists(string email)
+        {
+            MySqlCommand cmd = null;
+            MySqlDataReader reader = null;
+            try
+            {
+                string sql = "SELECT ID FROM Users WHERE Email = \"" + email + "\"";
+                cmd = new MySqlCommand(sql, connection);
+                //cmd.Parameters.AddWithValue("@token", token);
+                connection.Open();
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {                   
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                if (reader != null) reader.Close();
+                if (connection != null) connection.Close();
+            }
+            return false;
         }
     }
 }

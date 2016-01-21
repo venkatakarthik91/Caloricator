@@ -63,18 +63,7 @@ namespace Caloricator_Service.DataAccessLayer
             }
         }
 
-        public int Age
-        {
-            get
-            {
-                return age;
-            }
-
-            set
-            {
-                age = value;
-            }
-        }
+        
 
         public string Token
         {
@@ -115,10 +104,29 @@ namespace Caloricator_Service.DataAccessLayer
             }
         }
 
+        public int Age
+        {
+            get
+            {
+                return Convert.ToInt32(((DateTime.Now - dob).TotalDays) / 365);
+            }       
+        }
+        public DateTime Dob
+        {
+            get
+            {
+                return dob;
+            }
+            set
+            {
+                dob = value;
+            }
+        }
+
         private string lastName;
         private string firstName;
         private bool sex;
-        private int age;
+        private DateTime dob;
         private string token;
         private string email;
 

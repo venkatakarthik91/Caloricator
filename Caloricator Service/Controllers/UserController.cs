@@ -16,9 +16,9 @@ namespace Caloricator_Service.Controllers
     {
         // GET api/<controller>
         CustomIdentity identity = HttpContext.Current.User.Identity as CustomIdentity;
-        public string Get()
+        public Caloricator_Service.DataAccessLayer.User Get()
         {
-            return identity.User.FirstName;
+            return identity.User;
         }
 
         // GET api/<controller>/5

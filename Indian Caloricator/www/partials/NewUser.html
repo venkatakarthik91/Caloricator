@@ -22,9 +22,10 @@
         </div>
         <div class="form-group">
             <label for="emailID">Email address</label>
-            <input type="email" class="form-control" id="emailID" placeholder="Email" ng-model="formInfo.email">
-            <span class="alert-warning" ng-show="emailRequired">Please Enter Email</span><br />
+            <input type="email" class="form-control" id="emailID" placeholder="Email" ng-model="formInfo.email"ng-Blur="onEmailBlur()" >
+            <span class="alert-warning" ng-show="emailRequired">Please Enter Email</span>
             <span class="alert-warning" ng-show="invalidEmail">Please enter a valid Email Address</span>
+            <span class="alert-warning" ng-show="emailAlreadyExists">The Email already exists</span>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
@@ -34,19 +35,19 @@
         </div>
         <div class="form-group">
             <label for="confirmPassword" class="control-label">Confirm Password</label>
-            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" ng-model="formInfo.confirmPassword">
+            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" ng-model="formInfo.confirmPassword" >
             <span class="alert-warning" ng-show="confirmPasswordRequired">Please Enter the same password again</span><br />
             <span class="alert-warning" ng-show="matchPasswordRequired">Password and Confirm must match</span>
         </div>
         <div class="form-group">
             <label for="age" class="control-label">Age</label>
-            <input type="number" class="form-control" id="age" placeholder="Age" ng-model="formInfo.age">
-            <span class="alert-warning" ng-show="ageRequired">Please enter age</span>
+            <input type="date" class="form-control" id="dob" placeholder="Date of Birth" ng-model="formInfo.dob">
+            <span class="alert-warning" ng-show="dobRequired">Please enter your Date of Birth</span>
         </div>
         <div class="form-group" ng-init="formInfo.radio='Male'">
             <div class="radio">
                 <label>
-                    <input type="radio" name="optionsRadios" id="Male" value="Male" checked="checked" ng-model="formInfo.radio">
+                    <input type="radio" name="optionsRadios" id="Male" value="Male" ng-model="formInfo.radio">
                     Male
                 </label>
             </div>

@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.Http.Cors;
 using Caloricator_Service.DataAccessLayer;
 using System.Web;
+using System.Collections.Specialized;
 
 namespace Caloricator_Service.Controllers
 {
@@ -14,10 +15,13 @@ namespace Caloricator_Service.Controllers
     public class NewUserController : ApiController
     {
         //// GET: api/NewUser
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
+        public bool Get()
+        {
+            NameValueCollection nvc = HttpUtility.ParseQueryString(Request.RequestUri.Query);
+            string email = nvc["email"];
+            return DAL.CheckIfEmailExists((string)email);
+
+        }
 
         //// GET: api/NewUser/5
         //public string Get(int id)
