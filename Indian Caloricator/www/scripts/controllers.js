@@ -1,6 +1,5 @@
 ﻿/// <reference path=".\angular.js"/>
 /// <reference path=".\angular-route.js" />
-var urlOfCalorieControler = "http://caloricator.azurewebsites.net/api/calorie";
 var caloricator = angular.module("caloricator", ["ngRoute", "caloricatorControllers"]);
 //Custom drective ng-Blur
 caloricator.directive('ngBlur', function () {
@@ -10,7 +9,7 @@ caloricator.directive('ngBlur', function () {
         });
     };
 });
-var user=null;
+var user = null;
 caloricator.config(function ($routeProvider) {
     $routeProvider.when('/', {
         templateUrl: 'partials/home.html'//,
@@ -21,29 +20,36 @@ caloricator.config(function ($routeProvider) {
         templateUrl: 'partials/NewUser.html'
     }).when('/partials/Welcome.html', {
         templateUrl: 'partials/Welcome.html'
+    }).when('/partials/AddCalories.html', {
+        templateUrl: 'partials/AddCalories.html'
+    }).when('/partials/DisplayCalories.html', {
+        templateUrl: 'partials/DisplayCalories.html'
     });
 });
 var caloricatorControllers = angular.module("caloricatorControllers", []);
 
 caloricatorControllers.controller("CaloricatorController", function ($scope, $http) {
-    var promise = $http.get(urlOfCalorieControler);
-    //var promise = $http.get("http://caloricator.azurewebsites.net/api/calorie");
+    var promise = $http.get("http://localhost:48046/api/calorie");
     promise.then(function successCallback(response) {
         $scope.benefitsOfCounting = response.data;
     }, function errorCallback(response) {
     });
 });
-
-caloricatorControllers.controller("homeController", function ($scope, $http) {
-    var cookie = localStorage.getItem("AppAuth");
-    if (cookie === null || cookie === undefined || cookie == "") {
+caloricator.service("cookie", function () {
+    return {
+        getCookie: function () { return localStorage.getItem("AppAuth") },
+        setCookie: function (value) { localStorage.setItem("AppAuth", value) }
+    };
+});
+caloricatorControllers.controller("homeController", function ($scope, $http, cookie) {
+    if (cookie.getCookie() === null || cookie.getCookie() === undefined || cookie.getCookie() == "") {
         location.href = "#/partials/NewOrExisting.html";
     }
     else {
         $http({
-            url: 'http://caloricator.azurewebsites.net/api/user',
+            url: 'http://localhost:48046/api/user',
             method: "GET",
-            headers: { "AppAuth": cookie }
+            headers: { "AppAuth": cookie.getCookie() }
         }).success(function (data, status, headers, config) {
             user = data;
             location.href = "#/partials/Welcome.html";
@@ -58,7 +64,7 @@ caloricatorControllers.controller("newOrExistingUserController", function ($scop
     }
 });
 
-caloricatorControllers.controller("newUserController", function ($scope, $http) {
+caloricatorControllers.controller("newUserController", function ($scope, $http,cookie) {
     $scope.formInfo = {};
     var resetToDefaults = function () {
         $scope.firstNameRequired = false;
@@ -74,7 +80,7 @@ caloricatorControllers.controller("newUserController", function ($scope, $http) 
     var serverCheck = false;
     $scope.onEmailBlur = function () {
         $http({
-            url: 'http://caloricator.azurewebsites.net/api/newuser',
+            url: 'http://localhost:48046/api/newuser',
             method: "GET",
             params: { email: $scope.formInfo.email }
         }).success(function (data, status, headers, config) {
@@ -168,7 +174,7 @@ caloricatorControllers.controller("newUserController", function ($scope, $http) 
         if (!serverCheck) {
             setTimeout(function () {
                 noOfTimesInside++;
-                if (noOfTimesInside<=1) {
+                if (noOfTimesInside <= 1) {
                     $scope.Submit();
                 }
                 else {
@@ -179,12 +185,12 @@ caloricatorControllers.controller("newUserController", function ($scope, $http) 
         if (!($scope.confirmPasswordRequired || $scope.dobRequired || $scope.emailAlreadyExists || $scope.emailRequired || $scope.firstNameRequired || $scope.invalidEmail || $scope.lastNameRequired || $scope.matchPasswordRequired || $scope.passwordRequired || $scope.strongPasswordRequired)) {
             var data2 = JSON.stringify($scope.formInfo);
             $http({
-                url: 'http://caloricator.azurewebsites.net/api/newuser',
+                url: 'http://localhost:48046/api/newuser',
                 method: "POST",
                 data: data2
 
             }).success(function (data, status, headers, config) {
-                localStorage.setItem("AppAuth", data);
+                cookie.setCookie(data);
                 location.href = "#/partials/Welcome.html";
             }).error(function (data, status, headers, config) {
 
@@ -195,8 +201,68 @@ caloricatorControllers.controller("newUserController", function ($scope, $http) 
         }
     };
 });
-caloricatorControllers.controller("welcomeController", function ($scope, $http) {
+caloricator.service("radioChosen", function () {
+    var radioChosen = "";
+    return {
+        getRadioChosen: function () { return radioChosen },
+        setRadioChosen: function (value) { radioChosen = value; }
+    };
+});
+caloricatorControllers.controller("welcomeController", function ($scope, $http, radioChosen,cookie) {
+    $scope.formInfo = {};
     if (user != null) {
         $scope.user = user;
     }
+    $http({
+        url: "http://localhost:48046/api/Calorie",
+        method: "GET",
+        headers: { "AppAuth": cookie.getCookie() },
+        params: { operation: "GetCaloireCountForToday", todaysDate: (new Date()) }
+    }).success(function (data, status, headers, config) {
+        $scope.calories = data;
+    }).error(function (data, status, headers, config) {
+        $scope.calories = "Some Error Occured";
+    });
+    $scope.Submit = function () {
+        if ($scope.formInfo.radio == "Addcalories") {
+            location.href = "#/partials/AddCalories.html";
+        }
+        if ($scope.formInfo.radio == "GetDaysFailedAndPassedInPast1Week") {
+            radioChosen.setRadioChosen("GetDaysFailedAndPassedInPast1Week");
+            location.href = "#/partials/DisplayCalories.html";
+        }
+        if ($scope.formInfo.radio == "GetDaysFailedAndPassedCustom") {
+            radioChosen.setRadioChosen("GetDaysFailedAndPassedCustom");
+            location.href = "#/partials/DisplayCalories.html";
+        }
+    };
+});
+
+caloricatorControllers.controller("addCaloriesController", function ($scope, $http,cookie) {
+    $scope.formInfo = {};
+    $scope.formInfo.AmountofCalories = 100;
+    var currDate = new Date();
+    currDate.setSeconds(null, null);
+    $scope.formInfo.dateTime = currDate;
+    $scope.formInfo.timeZoneOffset = currDate.getTimezoneOffset();
+    $scope.Submit = function () {
+        $http({
+            url: "http://localhost:48046/api/Calorie",
+            method: "POST",
+            data: JSON.stringify($scope.formInfo),
+            headers: { "AppAuth": cookie.getCookie() }
+        }).success(function (data, status, headers, config) {
+            if (data==true) {
+                alert("Data posted successfully");
+            }
+            else {
+                alert("some error occured during insertion");
+            }
+        }).error(function (data, status, headers, config) {
+            alert("Error with value : " + status);
+        });
+    };
+});
+caloricatorControllers.controller("displayCaloriesController", function ($scope, $http, radioChosen) {
+
 });

@@ -119,5 +119,68 @@ namespace Caloricator_Service.DataAccessLayer
             }
             return false;
         }
+        internal static bool InsertCaloriesData(int uid , int calories,DateTime timeStamp,string comments)
+        {
+            try
+            {
+                string query = @"INSERT INTO Calories (ID,Calories,TS,Comments)
+                    VALUES(@ID,@Calories,@TS,@Comments);";
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ID", uid);
+                    cmd.Parameters.AddWithValue("@Calories", calories );
+                    cmd.Parameters.AddWithValue("@TS", timeStamp);
+                    cmd.Parameters.AddWithValue("@Comments", comments);
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                connection.Close();
+                return false;
+            }
+            return true;
+        }
+        internal static int GetCaloriesConsumed(int uid,DateTime date)
+        {
+            int sum = -1;
+            MySqlCommand cmd = null;
+            MySqlDataReader reader = null;
+            try
+            {
+                string month = date.Month.ToString();
+                string day = date.Day.ToString();
+                if (date.Month<10)
+                {
+                    month = 0.ToString() + date.Month;
+                }
+                if (date.Day < 10)
+                {
+                    day = 0.ToString() + date.Day;
+                }
+                string dateString = date.Year + "-" + month + "-" + day;
+                string sql = "select SUM(Calories) as sumOfCalories from Calories Where TS LIKE \"" + dateString + "%\" AND ID = " + uid;
+                cmd = new MySqlCommand(sql, connection);
+                //cmd.Parameters.AddWithValue("@token", token);
+                connection.Open();
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    sum= reader.GetInt32("sumOfCalories");
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                if (reader != null) reader.Close();
+                if (connection != null) connection.Close();
+            }
+            return sum;
+        }
     }
 }
