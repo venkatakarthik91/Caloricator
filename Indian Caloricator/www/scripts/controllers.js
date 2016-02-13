@@ -28,13 +28,6 @@ caloricator.config(function ($routeProvider) {
 });
 var caloricatorControllers = angular.module("caloricatorControllers", []);
 
-caloricatorControllers.controller("CaloricatorController", function ($scope, $http) {
-    var promise = $http.get("http://localhost:48046/api/calorie");
-    promise.then(function successCallback(response) {
-        $scope.benefitsOfCounting = response.data;
-    }, function errorCallback(response) {
-    });
-});
 caloricator.service("cookie", function () {
     return {
         getCookie: function () { return localStorage.getItem("AppAuth") },
@@ -47,7 +40,7 @@ caloricatorControllers.controller("homeController", function ($scope, $http, coo
     }
     else {
         $http({
-            url: 'http://localhost:48046/api/user',
+            url: 'http://caloricator.azurewebsites.net/api/user',
             method: "GET",
             headers: { "AppAuth": cookie.getCookie() }
         }).success(function (data, status, headers, config) {
@@ -64,7 +57,7 @@ caloricatorControllers.controller("newOrExistingUserController", function ($scop
     }
 });
 
-caloricatorControllers.controller("newUserController", function ($scope, $http,cookie) {
+caloricatorControllers.controller("newUserController", function ($scope, $http, cookie) {
     $scope.formInfo = {};
     var resetToDefaults = function () {
         $scope.firstNameRequired = false;
@@ -80,7 +73,7 @@ caloricatorControllers.controller("newUserController", function ($scope, $http,c
     var serverCheck = false;
     $scope.onEmailBlur = function () {
         $http({
-            url: 'http://localhost:48046/api/newuser',
+            url: 'http://caloricator.azurewebsites.net/api/newuser',
             method: "GET",
             params: { email: $scope.formInfo.email }
         }).success(function (data, status, headers, config) {
@@ -185,7 +178,7 @@ caloricatorControllers.controller("newUserController", function ($scope, $http,c
         if (!($scope.confirmPasswordRequired || $scope.dobRequired || $scope.emailAlreadyExists || $scope.emailRequired || $scope.firstNameRequired || $scope.invalidEmail || $scope.lastNameRequired || $scope.matchPasswordRequired || $scope.passwordRequired || $scope.strongPasswordRequired)) {
             var data2 = JSON.stringify($scope.formInfo);
             $http({
-                url: 'http://localhost:48046/api/newuser',
+                url: 'http://caloricator.azurewebsites.net/api/newuser',
                 method: "POST",
                 data: data2
 
@@ -201,20 +194,27 @@ caloricatorControllers.controller("newUserController", function ($scope, $http,c
         }
     };
 });
-caloricator.service("radioChosen", function () {
-    var radioChosen = "";
+caloricator.service("radioRelatedData", function () {
+    var radioRelatedData = {};
     return {
-        getRadioChosen: function () { return radioChosen },
-        setRadioChosen: function (value) { radioChosen = value; }
+        getRadioChosen: function () { return radioRelatedData },
+        setRadioChosen: function (value, startDate, endDate) { radioRelatedData = { radioChosen: value, startDate: startDate, endDate: endDate }; }
     };
 });
-caloricatorControllers.controller("welcomeController", function ($scope, $http, radioChosen,cookie) {
+caloricatorControllers.controller("welcomeController", function ($scope, $http, radioRelatedData, cookie) {
+    $scope.showDatePicker = false;
     $scope.formInfo = {};
     if (user != null) {
         $scope.user = user;
     }
+    $scope.btnClassObject = {
+        btn: true,
+        btnDanger: true,
+        btnPrimary: false
+    };
+    $scope.buttonText = "Add Calories";
     $http({
-        url: "http://localhost:48046/api/Calorie",
+        url: "http://caloricator.azurewebsites.net/api/Calorie",
         method: "GET",
         headers: { "AppAuth": cookie.getCookie() },
         params: { operation: "GetCaloireCountForToday", todaysDate: (new Date()) }
@@ -228,17 +228,42 @@ caloricatorControllers.controller("welcomeController", function ($scope, $http, 
             location.href = "#/partials/AddCalories.html";
         }
         if ($scope.formInfo.radio == "GetDaysFailedAndPassedInPast1Week") {
-            radioChosen.setRadioChosen("GetDaysFailedAndPassedInPast1Week");
+            var d = new Date();
+            d.setDate(d.getDate() - 5);
+            radioRelatedData.setRadioChosen("GetDaysFailedAndPassedInPast1Week", d.toDateString() ,new Date().toDateString());
             location.href = "#/partials/DisplayCalories.html";
         }
         if ($scope.formInfo.radio == "GetDaysFailedAndPassedCustom") {
-            radioChosen.setRadioChosen("GetDaysFailedAndPassedCustom");
+            radioRelatedData.setRadioChosen("GetDaysFailedAndPassedCustom");
+            $scope.formInfo.fromDate.setMinutes($scope.formInfo.fromDate.getMinutes() - $scope.formInfo.fromDate.getTimezoneOffset());
+            $scope.formInfo.toDate.setMinutes($scope.formInfo.toDate.getMinutes() - $scope.formInfo.toDate.getTimezoneOffset());
+            radioRelatedData.setRadioChosen("GetDaysFailedAndPassedCustom", $scope.formInfo.fromDate.toDateString(), $scope.formInfo.toDate.toDateString());
             location.href = "#/partials/DisplayCalories.html";
+        }
+    };
+    $scope.CheckForOption = function () {
+        if ($scope.formInfo.radio == "GetDaysFailedAndPassedCustom") {
+            $scope.showDatePicker = true;
+            $scope.btnClassObject.btnPrimary = true;
+            $scope.btnClassObject.btnDanger = false;
+            $scope.buttonText = "Get Data";
+        }
+        if ($scope.formInfo.radio == "GetDaysFailedAndPassedInPast1Week") {
+            $scope.showDatePicker = false;
+            $scope.btnClassObject.btnPrimary = true;
+            $scope.btnClassObject.btnDanger = false;
+            $scope.buttonText = "Get Data";
+        }
+        if ($scope.formInfo.radio == "Addcalories") {
+            $scope.showDatePicker = false;
+            $scope.btnClassObject.btnPrimary = false;
+            $scope.btnClassObject.btnDanger = true;
+            $scope.buttonText = "Add Calories";
         }
     };
 });
 
-caloricatorControllers.controller("addCaloriesController", function ($scope, $http,cookie) {
+caloricatorControllers.controller("addCaloriesController", function ($scope, $http, cookie) {
     $scope.formInfo = {};
     $scope.formInfo.AmountofCalories = 100;
     var currDate = new Date();
@@ -247,12 +272,12 @@ caloricatorControllers.controller("addCaloriesController", function ($scope, $ht
     $scope.formInfo.timeZoneOffset = currDate.getTimezoneOffset();
     $scope.Submit = function () {
         $http({
-            url: "http://localhost:48046/api/Calorie",
+            url: "http://caloricator.azurewebsites.net/api/Calorie",
             method: "POST",
             data: JSON.stringify($scope.formInfo),
             headers: { "AppAuth": cookie.getCookie() }
         }).success(function (data, status, headers, config) {
-            if (data==true) {
+            if (data == true) {
                 alert("Data posted successfully");
             }
             else {
@@ -263,6 +288,70 @@ caloricatorControllers.controller("addCaloriesController", function ($scope, $ht
         });
     };
 });
-caloricatorControllers.controller("displayCaloriesController", function ($scope, $http, radioChosen) {
-
+caloricatorControllers.controller("displayCaloriesController", function ($scope, $http, radioRelatedData, cookie) {
+    $scope.dataTableOfCalories = "";
+    $http({
+        url: "http://caloricator.azurewebsites.net/api/Calorie",
+        method: "GET",
+        headers: { "AppAuth": cookie.getCookie() },
+        params: { operation: radioRelatedData.getRadioChosen().radioChosen, startDate: radioRelatedData.getRadioChosen().startDate, endDate: radioRelatedData.getRadioChosen().endDate }
+    }).success(function (data, status, headers, config) {
+        $scope.dataTableOfCalories = data;
+        var sumOfCalEachDay = [];
+            sumOfCalEachDay.push({ datePart: $scope.dataTableOfCalories[0].TS, sum: $scope.dataTableOfCalories[0].Calories,times:[] ,id:0});
+            for (var i = 0; i < $scope.dataTableOfCalories.length; i++) {
+                var dateFromJSON = $scope.dataTableOfCalories[i].TS;
+                for (var j = 0; j < sumOfCalEachDay.length; j++) {
+                    if (CompareDates(dateFromJSON, sumOfCalEachDay[j].datePart) == "equal") {
+                        if (i != 0) {
+                            sumOfCalEachDay[j].sum += $scope.dataTableOfCalories[i].Calories;                        
+                        }
+                        var time = ExtractTime(dateFromJSON);
+                        sumOfCalEachDay[j].times.push({ time: time, comments: $scope.dataTableOfCalories[i].Comments, calories: $scope.dataTableOfCalories[i].Calories });
+                        break;
+                    }
+                    if (j + 1 == sumOfCalEachDay.length) {
+                        if (i != 0) {
+                            sumOfCalEachDay.push({ datePart: dateFromJSON, sum: $scope.dataTableOfCalories[i].Calories, times: [],id:i-1 });
+                            var time = ExtractTime(dateFromJSON);
+                            sumOfCalEachDay[j + 1].times.push({ time: time, comments: $scope.dataTableOfCalories[i].Comments, calories: $scope.dataTableOfCalories[i].Calories });
+                            break;
+                        }
+                    }
+                }
+            }
+            $scope.sumOfCalEachDay = sumOfCalEachDay;
+            $scope.timesArray = [];
+            var ctr = 0;
+            $scope.setID = function () {
+                return ctr++;
+            }
+            $scope.SetTimesArray = function (id) {
+                $scope.timesArray = sumOfCalEachDay[id].times;
+            };
+    }).error(function (data, status, headers, config) {
+        $scope.sumOfCalEachDay = "ERRORs";
+    });
 });
+function ExtractTime(date) {
+    return date.substring(11, date.length);
+}
+function CompareDates(date1, date2) {
+    var dayOfDate1 = date1.substring(8, 10);
+    var dayOfDate2 = date2.substring(8, 10);
+    var monthOfDate1 = date1.substring(5, 7);
+    var monthOfDate2 = date2.substring(5, 7);
+    var yearOfDate1 = date1.substring(0,4);
+    var yearOfdate2 = date2.substring(0, 4);
+    if (yearOfDate1 < yearOfDate1) { return "past" }
+    else if (yearOfDate1 > yearOfdate2) { return "future" }
+    else {
+        if (monthOfDate1 < monthOfDate2) { return "past" }
+        else if (monthOfDate1 > monthOfDate2) { return "future" }
+        else {
+            if (dayOfDate1 < dayOfDate2) { return "past" }
+            else if (dayOfDate1 > dayOfDate2) { return "future" }
+            else { return "equal" }
+        }
+    }
+}

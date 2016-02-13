@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using System.Globalization;
 
 namespace Caloricator_Service.DataAccessLayer
 {
@@ -150,19 +151,8 @@ namespace Caloricator_Service.DataAccessLayer
             MySqlDataReader reader = null;
             try
             {
-                string month = date.Month.ToString();
-                string day = date.Day.ToString();
-                if (date.Month<10)
-                {
-                    month = 0.ToString() + date.Month;
-                }
-                if (date.Day < 10)
-                {
-                    day = 0.ToString() + date.Day;
-                }
-                string dateString = date.Year + "-" + month + "-" + day;
-                string sql = "select SUM(Calories) as sumOfCalories from Calories Where TS LIKE \"" + dateString + "%\" AND ID = " + uid;
-                cmd = new MySqlCommand(sql, connection);
+                string query = "select SUM(Calories) as sumOfCalories from Calories Where TS LIKE \"" + date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + "%\" AND ID = " + uid;
+                cmd = new MySqlCommand(query, connection);
                 //cmd.Parameters.AddWithValue("@token", token);
                 connection.Open();
                 reader = cmd.ExecuteReader();
@@ -181,6 +171,31 @@ namespace Caloricator_Service.DataAccessLayer
                 if (connection != null) connection.Close();
             }
             return sum;
+        }
+        internal static DataTable GetCalorieData(int uid, DateTime startDate, DateTime endDate)
+        {
+            MySqlDataAdapter adapter = null;
+            DataTable dt = null;
+            DateTime endDateInclusive = endDate.AddDays(1);
+            try
+            {
+                string query = "SELECT Calories, TS, Comments FROM Calories where TS Between '" + startDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + "' AND '" + endDateInclusive.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + "' AND ID="+uid;
+                dt = new DataTable();
+                adapter = new MySqlDataAdapter(query, connection);
+                adapter.Fill(dt);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                if (adapter!=null)
+                {
+                    adapter.Dispose();
+                }
+            }
+            return dt;
         }
     }
 }

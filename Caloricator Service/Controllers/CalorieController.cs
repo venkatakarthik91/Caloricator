@@ -29,16 +29,12 @@ namespace Caloricator_Service.Controllers
                 DateTime todaysDate = Convert.ToDateTime(nvc["todaysDate"]);
                 returnData = CoreBusinessLogic.GetCaloireCountForToday(identity.User.Uid,todaysDate);
             }
-            //if (operation.Equals("GetDaysFailedAndPassedInPast1Week", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    returnData = CoreBusinessLogic.GetDaysFailedAndPassedInPast1Week(identity.User.Uid);
-            //}
-            //if (operation.Equals("GetDaysFailedAndPassedCustom", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    DateTime startDate = Convert.ToDateTime(nvc["startDate"]);
-            //    DateTime endDate = Convert.ToDateTime(nvc["endDate"]);
-            //    returnData = CoreBusinessLogic.GetDaysFailedAndPassedCustom(identity.User.Uid, startDate, endDate);
-            //}
+            if (operation.Equals("GetDaysFailedAndPassedInPast1Week", StringComparison.OrdinalIgnoreCase)|| operation.Equals("GetDaysFailedAndPassedCustom", StringComparison.OrdinalIgnoreCase))
+            {
+                DateTime startDate = Convert.ToDateTime(nvc["startDate"]);
+                DateTime endDate = Convert.ToDateTime(nvc["endDate"]);
+                returnData = CoreBusinessLogic.GetCalorieData(identity.User.Uid, startDate, endDate);
+            }
             return returnData;
         }
 

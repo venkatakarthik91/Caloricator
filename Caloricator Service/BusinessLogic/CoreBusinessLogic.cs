@@ -13,10 +13,10 @@ namespace Caloricator_Service.BusinessLogic
         {
             return DAL.GetCaloriesConsumed(uid, date);
         }
-        //internal static DataTable GetDaysFailedAndPassedInPast1Week(int uid)
-        //{
-
-        //}
+        internal static DataTable GetCalorieData(int uid, DateTime startDate, DateTime endDate)
+        {
+            return DAL.GetCalorieData(uid, startDate, endDate);
+        }
         //internal static DataTable GetDaysFailedAndPassedCustom(int uid, DateTime startDate, DateTime endDate)
         //{
 
