@@ -197,5 +197,33 @@ namespace Caloricator_Service.DataAccessLayer
             }
             return dt;
         }
+        internal static string ValidateCredentials(string emailId, string password)
+        {
+            string cookie = string.Empty;
+            MySqlCommand cmd = null;
+            MySqlDataReader reader = null;
+            try
+            {
+                string query = "select Token from users Where Email = \"" + emailId + "\" AND password = \"" + password+"\"";
+                cmd = new MySqlCommand(query, connection);
+                //cmd.Parameters.AddWithValue("@token", token);
+                connection.Open();
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    cookie = reader.GetString("Token");
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                if (reader != null) reader.Close();
+                if (connection != null) connection.Close();
+            }
+            return cookie;
+        }
     }
 }

@@ -8,8 +8,25 @@
     </style>
 </head>
 <body>-->
+<style>
+    .center-align-flex{
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        height:inherit
+    }
+    .center-align-position{
+        position:absolute !important;
+        top:40% !important;
+        left:0px;
+        right:0px;
+        width:100% !important;
+    }
+</style>
     <div class="container" ng-controller="homeController">
-        <div class="jumbotron">Welcome to Caloricator App</div>
+        <div class="row center-align-position">
+            <div class="jumbotron" style="text-align:center"><h4> Welcome to Caloricator </h4></div>
+        </div>
     </div>
 <!--<script src="scripts/angular.js"></script>
     <script src="scripts/angular-route.js"></script>

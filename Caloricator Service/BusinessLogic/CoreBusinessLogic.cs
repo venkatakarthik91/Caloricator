@@ -25,5 +25,9 @@ namespace Caloricator_Service.BusinessLogic
         {
             return DAL.InsertCaloriesData(uid, calories, timeStamp,comments);
         }
+        internal static string ValidateCredentials(string emailId, string password)
+        {
+            return DAL.ValidateCredentials(emailId, password);
+        } 
     }
 }
