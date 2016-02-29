@@ -80,6 +80,19 @@ caloricatorControllers.controller("newOrExistingUserController", function ($scop
             data: JSON.stringify($scope.formInfo)
         }).success(function (data, status, headers, config) {
             cookie.setCookie(data);
+            $http({
+                url: 'http://caloricator.azurewebsites.net/api/user',
+                method: "GET",
+                headers: { "AppAuth": cookie.getCookie() }
+            }).success(function (data, status, headers, config) {
+                setTimeout(function () {
+                    user = data;
+                    location.href = "#/partials/Welcome.html";
+                }, 1000);
+
+            }).error(function (data, status, headers, config) {
+                $scope.errorMessage = status;
+            });
             location.href = "#/partials/Welcome.html";
         }).error(function (data, status, headers, config) {
             alert("The data enter doesnt match any existing users");
@@ -246,10 +259,16 @@ caloricatorControllers.controller("welcomeController", function ($scope, $http, 
         }
     };
     $scope.logOut = function () {
-        var result = confirm("Are you sure you want to log out");
+        var result = confirm("Are you sure you want to log out ?");
         if (result) {
             cookie.setCookie("");
-            location.href = "#/partials/home.html";
+            location.href = "#/partials/NewOrExisting.html";
+        }
+    };
+    $scope.exitApp = function () {
+        var result = confirm("Are you sure you want to exit the app ?");
+        if (result) {
+            navigator.app.exitApp();
         }
     };
     $scope.showDatePicker = false;
@@ -264,7 +283,7 @@ caloricatorControllers.controller("welcomeController", function ($scope, $http, 
     };
     $scope.buttonText = "Add Calories";
     $http({
-        url: "http://caloricator.azurewebsites.net/api/Calorie",
+        url: "http://localhost:48046/api/Calorie",
         method: "GET",
         headers: { "AppAuth": cookie.getCookie() },
         params: { operation: "GetCaloireCountForToday", todaysDate: (new Date()) }

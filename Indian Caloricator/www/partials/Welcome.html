@@ -25,7 +25,23 @@
             <div class="tab-content">
                 <div class="tab-pane {{a2class}}" id="2">
                     <div class="jumbotron">Welcome to settings page</div>
-                    <button type="button" class="btn btn-primary" ng-click="logOut()">Log out</button>
+                    <div class="row">
+                        <div class="col-xs-12">                            
+                            <form class="form">
+                                <div class="form-group">
+                                    <p>Please choose an action</p>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <button type="button" class="btn btn-primary" ng-click="logOut()" id="logOut">Log out</button>
+                                    <label for="logOut" class="control-label">---> Login as a different user</label>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <button type="button" class="btn btn-primary" ng-click="exitApp()" id="exit">Exit App</button>
+                                    <label for="exit" class="control-label">---> Close the App </label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <div class="tab-pane {{a1class}}" id="1">
                     <div class="col-xs-12">
