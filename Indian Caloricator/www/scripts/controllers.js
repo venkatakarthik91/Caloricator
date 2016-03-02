@@ -283,7 +283,7 @@ caloricatorControllers.controller("welcomeController", function ($scope, $http, 
     };
     $scope.buttonText = "Add Calories";
     $http({
-        url: "http://localhost:48046/api/Calorie",
+        url: "http://caloricator.azurewebsites.net/api/Calorie",
         method: "GET",
         headers: { "AppAuth": cookie.getCookie() },
         params: { operation: "GetCaloireCountForToday", todaysDate: (new Date()) }
@@ -335,6 +335,8 @@ caloricatorControllers.controller("welcomeController", function ($scope, $http, 
 });
 
 caloricatorControllers.controller("addCaloriesController", function ($scope, $http, cookie) {
+    $scope.isShowSuccess = false;
+    $scope.isShowFailure = false;
     $scope.formInfo = {};
     $scope.formInfo.AmountofCalories = 100;
     var currDate = new Date();
@@ -348,10 +350,10 @@ caloricatorControllers.controller("addCaloriesController", function ($scope, $ht
             data: JSON.stringify($scope.formInfo),
             headers: { "AppAuth": cookie.getCookie() }
         }).success(function (data, status, headers, config) {
-            alert("Data posted successfully");
-
+            $scope.isShowSuccess = true;
         }).error(function (data, status, headers, config) {
-            alert("Error with Http status code : " + status);
+            $scope.isShowFailure = true;
+            $scope.statusCode = status;
         });
     };
 });
