@@ -35,6 +35,8 @@ caloricator.config(function ($routeProvider) {
         templateUrl: 'partials/AddCalories.html'
     }).when('/partials/DisplayCalories.html', {
         templateUrl: 'partials/DisplayCalories.html'
+    }).when('/partials/forgotPassword.html', {
+        templateUrl: 'partials/forgotPassword.html'
     });
 });
 var caloricatorControllers = angular.module("caloricatorControllers", []);
@@ -67,7 +69,7 @@ caloricatorControllers.controller("homeController", function ($scope, $http, coo
         });
     }
 });
-caloricatorControllers.controller("newOrExistingUserController", function ($scope, $http,cookie) {
+caloricatorControllers.controller("newOrExistingUserController", function ($scope, $http, cookie, emailOfUser) {
     $scope.active = "";
     $scope.formInfo = {};
     $scope.navigateToNewUser = function () {
@@ -97,6 +99,10 @@ caloricatorControllers.controller("newOrExistingUserController", function ($scop
         }).error(function (data, status, headers, config) {
             alert("The data enter doesnt match any existing users");
         });
+    };
+    $scope.goToForgotPasswordPage = function () {
+        emailOfUser.setEmailOfUser($scope.formInfo.email);
+        location.href = "#/partials/forgotPassword.html";
     };
 });
 
@@ -450,3 +456,26 @@ function formatAMPM(date) {
     var strTime = hours + ':' + minutes + ' ' + ampm;
     return strTime;
 }
+caloricator.service("emailOfUser", function () {
+    var emailOfUser = "";
+    return {
+        getEmailOfUser: function () { return emailOfUser },
+        setEmailOfUser: function (email) { emailOfUser = email }
+    };
+});
+caloricatorControllers.controller("forgotPasswordController", function ($scope, $http, cookie,emailOfUser) {
+    $scope.formInfo = {};
+    var dataToBeSent = { operation:"getQuestion",email: emailOfUser.getEmailOfUser()}
+        $http({
+        url: 'http://caloricator.azurewebsites.net/api/user',
+        method: "POST",
+        data: JSON.stringify("GetSecurityQuestion")
+    }).success(function (data, status, headers, config) {
+        setTimeout(function () {
+            user = data;
+            location.href = "#/partials/Welcome.html";
+        }, 1000);
+    }).error(function (data, status, headers, config) {
+        $scope.errorMessage = status;
+    });
+});
