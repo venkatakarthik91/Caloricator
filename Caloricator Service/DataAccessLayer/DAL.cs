@@ -225,5 +225,82 @@ namespace Caloricator_Service.DataAccessLayer
             }
             return cookie;
         }
+        internal static string GetSecurityQuestion(string emailId)
+        {
+            string question = string.Empty;
+            MySqlCommand cmd = null;
+            MySqlDataReader reader = null;
+            try
+            {
+                string query = "select question from users Where Email = \"" + emailId + "\"";
+                cmd = new MySqlCommand(query, connection);
+                //cmd.Parameters.AddWithValue("@token", token);
+                connection.Open();
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    question = reader.GetString("question");
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                if (reader != null) reader.Close();
+                if (connection != null) connection.Close();
+            }
+            return question;
+        }
+        internal static string GetAnswerForEmail(string email)
+        {
+            string answer = string.Empty;
+            MySqlCommand cmd = null;
+            MySqlDataReader reader = null;
+            try
+            {
+                string query = "select answer from users Where Email = \"" + email + "\"";
+                cmd = new MySqlCommand(query, connection);
+                //cmd.Parameters.AddWithValue("@token", token);
+                connection.Open();
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    answer = reader.GetString("answer");
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                if (reader != null) reader.Close();
+                if (connection != null) connection.Close();
+            }
+            return answer;
+        }
+        internal static bool UpdatePassword(string email,string password)
+        {
+            try
+            {
+                string query = @"Update users set password = @Password where email = @Email;";
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@Password", password);
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                connection.Close();
+                return false;
+            }
+            return true;
+        }
     }
 }

@@ -30,17 +30,44 @@ namespace Caloricator_Service.Controllers
         // POST api/<controller>
         public string Post([FromBody]dynamic userData)
         {
-            string emailId = userData.email;
-            string password = userData.password;
-            string cookie =  BusinessLogic.CoreBusinessLogic.ValidateCredentials(emailId, password);
-            if (cookie==string.Empty)
+            if (userData.operation == "updatePassword")
             {
-                throw new HttpException("The credentials are invalid");
+                string emailId = userData.email;
+                string password = userData.password;
+                BusinessLogic.CoreBusinessLogic.UpdatePassword(emailId,password);
+                string cookie = BusinessLogic.CoreBusinessLogic.ValidateCredentials(emailId, password);
+                if (cookie == string.Empty)
+                {
+                    throw new HttpException("The credentials are invalid");
+                }
+                else
+                {
+                    return cookie;
+                }
             }
-            else
+            if (userData.operation == "submitAnswer")
             {
-                return cookie;
+                return BusinessLogic.CoreBusinessLogic.CheckIfAnswerIsCorrect(Convert.ToString(userData.answer), Convert.ToString(userData.email));
             }
+            if (userData.operation == "getQuestion")
+            {
+                return BusinessLogic.CoreBusinessLogic.GetSecurityQuestion(Convert.ToString(userData.email));
+            }
+            if (userData.operation == "login")
+            {
+                string emailId = userData.email;
+                string password = userData.password;
+                string cookie = BusinessLogic.CoreBusinessLogic.ValidateCredentials(emailId, password);
+                if (cookie == string.Empty)
+                {
+                    throw new HttpException("The credentials are invalid");
+                }
+                else
+                {
+                    return cookie;
+                }
+            }
+            throw new HttpException("Invalid Operation. Maybe a hacking attempt");
         }
         [Authorize]
         // PUT api/<controller>/5

@@ -55,7 +55,7 @@ caloricatorControllers.controller("homeController", function ($scope, $http, coo
     }
     else {
         $http({
-            url: 'http://caloricator.azurewebsites.net/api/user',
+            url: 'http://localhost:48046/api/user',
             method: "GET",
             headers: { "AppAuth": cookie.getCookie() }
         }).success(function (data, status, headers, config) {
@@ -76,14 +76,15 @@ caloricatorControllers.controller("newOrExistingUserController", function ($scop
         location.href = "#/partials/NewUser.html";
     }
     $scope.login = function () {
+        $scope.formInfo.operation = "login";
         $http({
-            url: 'http://caloricator.azurewebsites.net/api/user',
+            url: 'http://localhost:48046/api/user',
             method: "POST",
             data: JSON.stringify($scope.formInfo)
         }).success(function (data, status, headers, config) {
             cookie.setCookie(data);
             $http({
-                url: 'http://caloricator.azurewebsites.net/api/user',
+                url: 'http://localhost:48046/api/user',
                 method: "GET",
                 headers: { "AppAuth": cookie.getCookie() }
             }).success(function (data, status, headers, config) {
@@ -91,11 +92,9 @@ caloricatorControllers.controller("newOrExistingUserController", function ($scop
                     user = data;
                     location.href = "#/partials/Welcome.html";
                 }, 1000);
-
             }).error(function (data, status, headers, config) {
                 $scope.errorMessage = status;
             });
-            location.href = "#/partials/Welcome.html";
         }).error(function (data, status, headers, config) {
             alert("The data enter doesnt match any existing users");
         });
@@ -122,7 +121,7 @@ caloricatorControllers.controller("newUserController", function ($scope, $http, 
     var serverCheck = false;
     $scope.onEmailBlur = function () {
         $http({
-            url: 'http://caloricator.azurewebsites.net/api/newuser',
+            url: 'http://localhost:48046/api/newuser',
             method: "GET",
             params: { email: $scope.formInfo.email }
         }).success(function (data, status, headers, config) {
@@ -227,7 +226,7 @@ caloricatorControllers.controller("newUserController", function ($scope, $http, 
         if (!($scope.confirmPasswordRequired || $scope.dobRequired || $scope.emailAlreadyExists || $scope.emailRequired || $scope.firstNameRequired || $scope.invalidEmail || $scope.lastNameRequired || $scope.matchPasswordRequired || $scope.passwordRequired || $scope.strongPasswordRequired)) {
             var data2 = JSON.stringify($scope.formInfo);
             $http({
-                url: 'http://caloricator.azurewebsites.net/api/newuser',
+                url: 'http://localhost:48046/api/newuser',
                 method: "POST",
                 data: data2
 
@@ -289,7 +288,7 @@ caloricatorControllers.controller("welcomeController", function ($scope, $http, 
     };
     $scope.buttonText = "Add Calories";
     $http({
-        url: "http://caloricator.azurewebsites.net/api/Calorie",
+        url: "http://localhost:48046/api/Calorie",
         method: "GET",
         headers: { "AppAuth": cookie.getCookie() },
         params: { operation: "GetCaloireCountForToday", todaysDate: (new Date()) }
@@ -351,7 +350,7 @@ caloricatorControllers.controller("addCaloriesController", function ($scope, $ht
     $scope.formInfo.timeZoneOffset = currDate.getTimezoneOffset();
     $scope.Submit = function () {
         $http({
-            url: "http://caloricator.azurewebsites.net/api/Calorie",
+            url: "http://localhost:48046/api/Calorie",
             method: "POST",
             data: JSON.stringify($scope.formInfo),
             headers: { "AppAuth": cookie.getCookie() }
@@ -366,7 +365,7 @@ caloricatorControllers.controller("addCaloriesController", function ($scope, $ht
 caloricatorControllers.controller("displayCaloriesController", function ($scope, $http, radioRelatedData, cookie) {
     $scope.dataTableOfCalories = "";
     $http({
-        url: "http://caloricator.azurewebsites.net/api/Calorie",
+        url: "http://localhost:48046/api/Calorie",
         method: "GET",
         headers: { "AppAuth": cookie.getCookie() },
         params: { operation: radioRelatedData.getRadioChosen().radioChosen, startDate: radioRelatedData.getRadioChosen().startDate, endDate: radioRelatedData.getRadioChosen().endDate }
@@ -463,19 +462,67 @@ caloricator.service("emailOfUser", function () {
         setEmailOfUser: function (email) { emailOfUser = email }
     };
 });
-caloricatorControllers.controller("forgotPasswordController", function ($scope, $http, cookie,emailOfUser) {
+caloricatorControllers.controller("forgotPasswordController", function ($scope, $http, cookie, emailOfUser) {
     $scope.formInfo = {};
-    var dataToBeSent = { operation:"getQuestion",email: emailOfUser.getEmailOfUser()}
-        $http({
-        url: 'http://caloricator.azurewebsites.net/api/user',
+    $scope.newPasswordform = {};
+    $scope.answerMatches = false;
+    $scope.passwordUpdatedSuccessfully = false;
+    var dataToBeSent = { operation: "getQuestion", email: emailOfUser.getEmailOfUser() }
+    $http({
+        url: 'http://localhost:48046/api/user',
         method: "POST",
-        data: JSON.stringify("GetSecurityQuestion")
+        data: JSON.stringify(dataToBeSent)
     }).success(function (data, status, headers, config) {
-        setTimeout(function () {
-            user = data;
-            location.href = "#/partials/Welcome.html";
-        }, 1000);
+        $scope.Question = data;
     }).error(function (data, status, headers, config) {
         $scope.errorMessage = status;
     });
+    $scope.Submit = function () {
+        var submitAnswer = { operation: "submitAnswer", answer: $scope.formInfo.answer, email: emailOfUser.getEmailOfUser() };
+        $http({
+            url: 'http://localhost:48046/api/user',
+            method: "POST",
+            data: JSON.stringify(submitAnswer)
+        }).success(function (data, status, headers, config) {
+            if (data == "true") {
+                $scope.answerMatches = true;
+            }
+            else {
+                $scope.isWrongAnswer = true;
+            }
+        }).error(function (data, status, headers, config) {
+            $scope.errorMessage = status;
+        });
+    };
+    $scope.UpdatePassword = function () {
+        if ($scope.newPasswordform.password != $scope.newPasswordform.confirmPassword) {
+            $scope.passwordsDontMatch = true;
+            return false;
+        }
+        var updatePassword = { operation: "updatePassword",password: $scope.newPasswordform.password, email: emailOfUser.getEmailOfUser() };
+        $http({
+            url: 'http://localhost:48046/api/user',
+            method: "POST",
+            data: JSON.stringify(updatePassword)
+        }).success(function (data, status, headers, config) {
+            if (data != "") {
+                $scope.passwordUpdatedSuccessfully = true;
+                cookie.setCookie(data);
+                $http({
+                    url: 'http://localhost:48046/api/user',
+                    method: "GET",
+                    headers: { "AppAuth": cookie.getCookie() }
+                }).success(function (data, status, headers, config) {
+                    setTimeout(function () {
+                        user = data;
+                        location.href = "#/partials/Welcome.html";
+                    }, 1000);
+                }).error(function (data, status, headers, config) {
+                    $scope.errorMessage = status;
+                });
+            }
+        }).error(function (data, status, headers, config) {
+            $scope.errorMessage = status;
+        });
+    };
 });

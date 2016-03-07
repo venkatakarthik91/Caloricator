@@ -29,5 +29,26 @@ namespace Caloricator_Service.BusinessLogic
         {
             return DAL.ValidateCredentials(emailId, password);
         } 
+        internal static string GetSecurityQuestion(string email)
+        {
+            return DAL.GetSecurityQuestion(email);
+        }
+        internal static string CheckIfAnswerIsCorrect(string answer,string email)
+        {
+            string answerFromDB = DAL.GetAnswerForEmail(email);
+            if (answer.Equals(answerFromDB, StringComparison.OrdinalIgnoreCase))
+            {
+                return "true";
+            }
+            return "false";
+        }
+        internal static string UpdatePassword(string emailId, string password)
+        {
+            if (DAL.UpdatePassword(emailId, password))
+            {
+                return "true";
+            }
+            return "false";
+        }
     }
 }
